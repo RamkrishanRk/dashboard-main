@@ -1,7 +1,7 @@
 import { call, put, takeEvery, all, fork } from "redux-saga/effects";
 
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // Ecoomerce Redux States
 import {
@@ -14,7 +14,7 @@ import {
   ADD_BRAND,
   UPDATE_PRODUCT,
   GET_VENDOR,
-  ADD_VENDOR
+  ADD_VENDOR,
 } from "./actionType";
 
 import {
@@ -47,20 +47,24 @@ import {
 
 function* getProducts({ payload: productparams }) {
   try {
-    // console.log("response", productparams)
     const response = yield call(getProductsApi, productparams);
-    console.log(response,"responseresponse");
-    // yield put(ecommerceApiResponseSuccess(GET_PRODUCTS, { products: response.data, items_count: response.items_count, curPage: productparams.page, pageSize: productparams.limit }));
+    yield put(
+      ecommerceApiResponseSuccess(GET_PRODUCTS, {
+        products: response.data,
+        items_count: response.items_count,
+        curPage: productparams.page,
+        pageSize: productparams.limit,
+      })
+    );
   } catch (error) {
-    console.log(error,"errorerror");
-    yield put(ecommerceApiResponseError(GET_PRODUCTS, error,));
+    console.log(error, "errorerror");
+    yield put(ecommerceApiResponseError(GET_PRODUCTS, error));
   }
 }
 function* getItem({ payload: data }) {
   try {
     yield put(getSelectedItemSuccess(GET_SELECTED_ITEM, data));
-  }
-  catch (error) {
+  } catch (error) {
     console.log("error");
   }
 }
@@ -69,7 +73,7 @@ function* addProduct({ payload: product }) {
     // console.log("response", product);
     const response = yield call(addProductApi, product);
   } catch (error) {
-    console.log("error")
+    console.log("error");
   }
 }
 function* updateProduct({ payload: data }) {
@@ -77,9 +81,8 @@ function* updateProduct({ payload: data }) {
   try {
     const response = yield call(updateProductApi, data);
     yield put(updateProductSuccess(UPDATE_PRODUCT, data));
-  }
-  catch {
-    console.log("error")
+  } catch {
+    console.log("error");
   }
 }
 function* getTableColumns() {
@@ -87,9 +90,8 @@ function* getTableColumns() {
     const response = yield call(getTableColumnsAPI);
     //console.log("response table", response)
     yield put(getTableColumnsSuccess(GET_TABLE_COLUMNS, response.data));
-  }
-  catch (error) {
-    yield put(getTableColumnsError(GET_TABLE_COLUMNS, error))
+  } catch (error) {
+    yield put(getTableColumnsError(GET_TABLE_COLUMNS, error));
   }
 }
 function* updateTableColumns({ payload: tableColumns }) {
@@ -98,9 +100,8 @@ function* updateTableColumns({ payload: tableColumns }) {
     const response = yield call(updateTableColumnsAPI, tableColumns);
     //console.log("tablecolumns response", response)
     yield put(updateTableColumnsSuccess(UPDATE_TABLE_COLUMNS, response.data));
-  }
-  catch (error) {
-    yield put(updateTableColumnsError(UPDATE_TABLE_COLUMNS, error))
+  } catch (error) {
+    yield put(updateTableColumnsError(UPDATE_TABLE_COLUMNS, error));
   }
 }
 function* getBrands() {
@@ -150,7 +151,7 @@ export function* watchGetTableColumns() {
 }
 
 export function* watchUpdateTableColumns() {
-  yield takeEvery(UPDATE_TABLE_COLUMNS, updateTableColumns)
+  yield takeEvery(UPDATE_TABLE_COLUMNS, updateTableColumns);
 }
 export function* watchBGetBrands() {
   yield takeEvery(GET_BRAND, getBrands);
@@ -178,7 +179,7 @@ function* ecommerceSaga() {
     fork(watchAddBrand),
     fork(watchGetVendor),
     fork(watchAddVendor),
-    fork(watchUpdateProduct)
+    fork(watchUpdateProduct),
   ]);
 }
 
