@@ -1,32 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import BreadCrumb from "../../../Components/Common/BreadCrumb";
 import {
   Card,
   CardBody,
   Col,
   Container,
-  CardHeader,
-  Nav,
-  NavItem,
-  NavLink,
   Row,
-  TabContent,
-  TabPane,
   Input,
   Label,
-  FormFeedback,
   Form,
 } from "reactstrap";
 
 // Redux
-import { useDispatch, useSelector } from "react-redux";
-import { addProduct as onAddNewProduct } from "../../../store/ecommerce/action";
+import { useSelector } from "react-redux";
 
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-import classnames from "classnames";
-import Dropzone from "react-dropzone";
-import { Link, useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 
 //formik
 import { useFormik } from "formik";
@@ -40,166 +28,22 @@ import "filepond/dist/filepond.min.css";
 import FilePondPluginImageExifOrientation from "filepond-plugin-image-exif-orientation";
 import FilePondPluginImagePreview from "filepond-plugin-image-preview";
 import "filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css";
-import axios from "axios";
 
 // Register the plugins
 registerPlugin(FilePondPluginImageExifOrientation, FilePondPluginImagePreview);
 
-const EcommerceAddProduct = (props) => {
+const EcommerceAddProduct = () => {
   document.title = "View Product | Abe's Website";
 
   const history = useNavigate();
-  const dispatch = useDispatch();
 
   const { selectedItem, brand } = useSelector((state) => {
-    //console.log("state", state)
     return {
       selectedItem: state.Ecommerce.selectedItem,
       brand: state.Ecommerce.brand,
     };
   });
-  const [customActiveTab, setcustomActiveTab] = useState("1");
-  const toggleCustom = (tab) => {
-    if (customActiveTab !== tab) {
-      setcustomActiveTab(tab);
-    }
-  };
-  const [selectedFiles, setselectedFiles] = useState([]);
-  const [selectedVisibility, setselectedVisibility] = useState(null);
-
-  function handleAcceptedFiles(files) {
-    files.map((file) =>
-      Object.assign(file, {
-        preview: URL.createObjectURL(file),
-        formattedSize: formatBytes(file.size),
-      })
-    );
-    setselectedFiles(files);
-  }
-
-  function handleSelectVisibility(selectedVisibility) {
-    setselectedVisibility(selectedVisibility);
-  }
-
-  /**
-   * Formats the size
-   */
-  function formatBytes(bytes, decimals = 2) {
-    if (bytes === 0) return "0 Bytes";
-    const k = 1024;
-    const dm = decimals < 0 ? 0 : decimals;
-    const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
-  }
-
-  const productCategory = [
-    {
-      options: [
-        { label: "All", value: "All" },
-        { label: "Appliances", value: "Kitchen Storage & Containers" },
-        { label: "Fashion", value: "Clothes" },
-        { label: "Electronics", value: "Electronics" },
-        { label: "Grocery", value: "Grocery" },
-        { label: "Home & Furniture", value: "Furniture" },
-        { label: "Kids", value: "Kids" },
-        { label: "Mobiles", value: "Mobiles" },
-      ],
-    },
-  ];
-
-  const dateFormat = () => {
-    let d = new Date(),
-      months = [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-      ];
-    let h = d.getHours() % 12 || 12;
-    let ampm = d.getHours() < 12 ? "AM" : "PM";
-    return (
-      d.getDate() +
-      " " +
-      months[d.getMonth()] +
-      ", " +
-      d.getFullYear() +
-      ", " +
-      h +
-      ":" +
-      d.getMinutes() +
-      " " +
-      ampm
-    ).toString();
-  };
-
-  const [date, setDate] = useState(dateFormat());
-
-  const dateformate = (e) => {
-    const dateString = e.toString().split(" ");
-    let time = dateString[4];
-    let H = +time.substr(0, 2);
-    let h = H % 12 || 12;
-    h = h <= 9 ? (h = "0" + h) : h;
-    let ampm = H < 12 ? "AM" : "PM";
-    time = h + time.substr(2, 3) + " " + ampm;
-
-    const date = dateString[2] + " " + dateString[1] + ", " + dateString[3];
-    const orderDate = (date + ", " + time).toString();
-    setDate(orderDate);
-  };
-
-  const productStatus = [
-    {
-      options: [
-        { label: "Draft", value: "draft" },
-        { label: "Published", value: "published" },
-        { label: "Scheduled", value: "scheduled" },
-      ],
-    },
-  ];
-
-  const brandList = [
-    {
-      options: [
-        { label: "Valpro", value: "valpro" },
-        { label: "Dutchess", value: "Dutchess" },
-        { label: "Maxx Cold", value: "Maxx Cold" },
-        { label: "Maxx Ice", value: "Maxx Ice" },
-        { label: "Maxx Marine", value: "Maxx Marine" },
-        { label: "prepline", value: "prepline" },
-        { label: "Coldline", value: "Coldline" },
-        { label: "Migali", value: "migali" },
-        {
-          label: "American Eagle Food Machinery",
-          value: "American Eagle Food Machinery",
-        },
-        { label: "Standard range", value: "standard range" },
-        { label: "USR", value: "USR" },
-        { label: "Coldline ice", value: "Coldline ice" },
-        { label: "Southwood", value: "southwood" },
-        { label: "Cookline", value: "Cookline" },
-      ],
-    },
-  ];
-
-  const productVisibility = [
-    {
-      options: [
-        { label: "Hidden", value: "Hidden" },
-        { label: "Public", value: "Public" },
-      ],
-    },
-  ];
+  // console.log(selectedItem, "selectedItem");
   let values = {};
   if (selectedItem != null) values = selectedItem.values;
   const validation = useFormik({
@@ -330,13 +174,9 @@ const EcommerceAddProduct = (props) => {
     }),
     onSubmit: (values) => {
       console.log("submit function");
-
-      // save new product
-      // dispatch(onAddNewProduct(newProduct));
-      // history("/apps-ecommerce-products");
-      // validation.resetForm();
     },
   });
+  console.log(values, "valuesvalues");
   if (selectedItem == null) return <Navigate to={{ pathname: "/" }} />;
 
   return (
@@ -348,12 +188,7 @@ const EcommerceAddProduct = (props) => {
             <Form
               onSubmit={(e) => {
                 e.preventDefault();
-                // console.log(validation.handleSubmit());
-                // console.log(validation.isValid)
-                // console.log(validation.values)
-                // dispatch(onAddNewProduct(validation.values));
                 history("/products");
-                //validation.resetForm();
                 return true;
               }}
             >
@@ -477,7 +312,7 @@ const EcommerceAddProduct = (props) => {
                     <div className="card-header">
                       <div className="d-flex">
                         <div className="flex-grow-1">
-                          <BreadCrumb title="Pricing Section" pageTitle="" />
+                          <BreadCrumb title="Shipping Section" pageTitle="" />
                         </div>
                       </div>
                     </div>
@@ -492,9 +327,10 @@ const EcommerceAddProduct = (props) => {
                               Shipping Method
                             </Label>
                             <Input
-                              type="password"
+                              type="text"
                               className="form-control"
                               placeholder="Shipping Method"
+                              value={values?.Shipping_Method?.[0]?.data}
                               readOnly
                             />
                           </div>
@@ -509,9 +345,10 @@ const EcommerceAddProduct = (props) => {
                               Shipping Weight
                             </Label>
                             <Input
-                              type="password"
+                              type="text"
                               className="form-control"
                               placeholder="Shipping Weight"
+                              value={values?.Shipping_Weight?.[0]?.data}
                               readOnly
                             />
                           </div>
@@ -526,203 +363,13 @@ const EcommerceAddProduct = (props) => {
                               Shipping Width
                             </Label>
                             <Input
-                              type="password"
-                              className="form-control"
-                              placeholder="Shipping Width"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label htmlFor=" List-Price" className="form-label">
-                              List Price
-                            </Label>
-                            <Input
                               type="text"
                               className="form-control"
-                              placeholder="List Price"
+                              value={values?.Shipping_Width?.[0]?.data}
                               readOnly
                             />
                           </div>
                         </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label
-                              htmlFor="Shipping-Cost"
-                              className="form-label"
-                            >
-                              Net Cost
-                            </Label>
-                            <Input
-                              type="text"
-                              className="form-control"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label htmlFor=" Map-Price" className="form-label">
-                              Map Price
-                            </Label>
-                            <Input
-                              type="text"
-                              className="form-control"
-                              placeholder="Map Price"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label htmlFor=" Map-Policy" className="form-label">
-                              Map Policy
-                            </Label>
-                            <Input
-                              type="text"
-                              className="form-control"
-                              placeholder="Map Policy"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label
-                              htmlFor="Quarterly-Rebate"
-                              className="form-label"
-                            >
-                              Quarterly Rebate
-                            </Label>
-                            <div className="form-icon right">
-                              <Input
-                                type="text"
-                                className="form-control "
-                                placeholder="Quarterly Rebate"
-                                readOnly
-                              />
-                            </div>
-                          </div>
-                        </Col>
-                        <Col md={12}>
-                          <div className="mb-3">
-                            <Label
-                              htmlFor="Annual Rebate"
-                              className="form-label"
-                            >
-                              Annual Rebate
-                            </Label>
-                            <div className="form-icon right">
-                              <Input
-                                type="text"
-                                className="form-control "
-                                placeholder="Annual Rebate"
-                                readOnly
-                              />
-                            </div>
-                          </div>
-                        </Col>
-                      </Row>
-                    </div>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-        <Row>
-          {/* <Col md={6}>
-            <Row>
-              <Col>
-                <div className="col-xl-12 col-lg-12">
-                  <div className="card">
-                    <div className="card-header">
-                      <div className="d-flex">
-                        <div className="flex-grow-1">
-                          <BreadCrumb
-                            title="Competition Section"
-                            pageTitle=""
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="card-body pt-3"></div>
-                  </div>
-                </div>
-              </Col>
-            </Row>
-          </Col> */}
-          <Col md={12}>
-            <Row>
-              <Col>
-                <div className="col-xl-12 col-lg-12">
-                  <div className="card">
-                    <div className="card-header">
-                      <div className="d-flex">
-                        <div className="flex-grow-1">
-                          <BreadCrumb title="Shipping Section" pageTitle="" />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="card-body pt-3">
-                      <Row>
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label
-                              htmlFor="Pricing-Category"
-                              className="form-label"
-                            >
-                              Pricing Category
-                            </Label>
-                            <Input
-                              type="password"
-                              className="form-control"
-                              id="Pricing-Category"
-                              placeholder="Pricing Category"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label htmlFor="Price" className="form-label">
-                              Price
-                            </Label>
-                            <Input
-                              type="password"
-                              className="form-control"
-                              id="Price"
-                              placeholder="Price"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
-                        <Col md={6}>
-                          <div className="mb-3">
-                            <Label
-                              htmlFor="Profit-Margin"
-                              className="form-label"
-                            >
-                              Profit Margin
-                            </Label>
-                            <Input
-                              type="password"
-                              className="form-control"
-                              id="Profit-Margin"
-                              placeholder="Profit Margin"
-                              readOnly
-                            />
-                          </div>
-                        </Col>
-
                         <Col md={6}>
                           <div className="mb-3">
                             <Label
@@ -735,6 +382,7 @@ const EcommerceAddProduct = (props) => {
                               type="text"
                               className="form-control"
                               id="Shipping-Depth"
+                              value={values?.Shipping_Depth?.[0]?.data}
                               placeholder="Shipping Depth"
                               readOnly
                             />
@@ -753,7 +401,7 @@ const EcommerceAddProduct = (props) => {
                               type="text"
                               className="form-control"
                               id="Shipping-Height"
-                              defaultValue="Shipping Height"
+                              value={values?.Shipping_Method?.[0]?.data}
                               readOnly
                             />
                           </div>
@@ -772,6 +420,7 @@ const EcommerceAddProduct = (props) => {
                               className="form-control"
                               id="Freight-Class"
                               placeholder="Freight Class "
+                              value={values?.Freight_Class?.[0]?.data}
                             />
                           </div>
                         </Col>
@@ -824,6 +473,197 @@ const EcommerceAddProduct = (props) => {
                                 type="text"
                                 className="form-control"
                                 placeholder="Additional Fee"
+                              />
+                            </div>
+                          </div>
+                        </Col>
+                      </Row>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+        <Row>
+          {/* <Col md={6}>
+            <Row>
+              <Col>
+                <div className="col-xl-12 col-lg-12">
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="d-flex">
+                        <div className="flex-grow-1">
+                          <BreadCrumb
+                            title="Competition Section"
+                            pageTitle=""
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="card-body pt-3"></div>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Col> */}
+          <Col md={12}>
+            <Row>
+              <Col>
+                <div className="col-xl-12 col-lg-12">
+                  <div className="card">
+                    <div className="card-header">
+                      <div className="d-flex">
+                        <div className="flex-grow-1">
+                          <BreadCrumb title="Pricing Section" pageTitle="" />
+                        </div>
+                      </div>
+                    </div>
+                    <div className="card-body pt-3">
+                      <Row>
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label
+                              htmlFor="Pricing-Category"
+                              className="form-label"
+                            >
+                              Pricing Category
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              id="Pricing-Category"
+                              placeholder="Pricing Category"
+                              value={values?.Pricing_Category?.[0]?.data}
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label htmlFor="Price" className="form-label">
+                              Price
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              id="Price"
+                              placeholder="Price"
+                              value={values?.Price?.[0]?.data?.[0]?.amount}
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label
+                              htmlFor="Profit-Margin"
+                              className="form-label"
+                            >
+                              Profit Margin
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              id="Profit-Margin"
+                              placeholder="Profit Margin"
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label htmlFor=" List-Price" className="form-label">
+                              List Price
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              placeholder="List Price"
+                              value={values?.List_Price?.[0]?.data?.[0]?.amount}
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label
+                              htmlFor="Shipping-Cost"
+                              className="form-label"
+                            >
+                              Net Cost
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              value={values?.Net_Cost?.[0]?.data?.[0]?.amount}
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label htmlFor=" Map-Price" className="form-label">
+                              Map Price
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              placeholder="Map Price"
+                              value={values?.MAP_Price?.[0]?.data[0]?.amount}
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label htmlFor=" Map-Policy" className="form-label">
+                              Map Policy
+                            </Label>
+                            <Input
+                              type="text"
+                              className="form-control"
+                              value={values?.MAP_Policy?.[0]?.data}
+                              readOnly
+                            />
+                          </div>
+                        </Col>
+
+                        <Col md={6}>
+                          <div className="mb-3">
+                            <Label
+                              htmlFor="Quarterly-Rebate"
+                              className="form-label"
+                            >
+                              Quarterly Rebate
+                            </Label>
+                            <div className="form-icon right">
+                              <Input
+                                type="text"
+                                className="form-control "
+                                readOnly
+                              />
+                            </div>
+                          </div>
+                        </Col>
+                        <Col md={12}>
+                          <div className="mb-3">
+                            <Label
+                              htmlFor="Annual Rebate"
+                              className="form-label"
+                            >
+                              Annual Rebate
+                            </Label>
+                            <div className="form-icon right">
+                              <Input
+                                type="text"
+                                className="form-control "
+                                placeholder="Annual Rebate"
+                                readOnly
                               />
                             </div>
                           </div>
